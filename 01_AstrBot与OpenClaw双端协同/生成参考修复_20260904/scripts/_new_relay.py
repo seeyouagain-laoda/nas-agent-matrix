@@ -28,7 +28,7 @@ NVM_BIN = "/home/<NAS_SSH_USER>/.nvm/versions/node/v22.22.3/bin"
 TIMEOUT = 280
 
 # PokeAPI 生图（方法一）
-POKE_KEY = "sk-2484a55bd21c9d84293e8a245a2816546ae7623617c1684948a5d7e64b1e4f2f"
+POKE_KEY = os.environ.get("POKE_API_KEY", "")
 POKE_IMG_URL = "https://www.poke2api.com/v1/images/generations"
 POKE_PROXY = "http://127.0.0.1:7890"
 GEN_DIR = "<NAS_DATA_DIR>/memes/generated"          # 主机路径（AstrBot ro 绑定源）

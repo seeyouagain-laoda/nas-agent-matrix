@@ -32,7 +32,7 @@ NapCat  (Docker, OneBot v11)
 AstrBot  (Docker, 鲸鱼娘人格 + 云端LLM大脑)
    │  /任务 指令 → aiohttp POST（带 X-Relay-Token）
    ▼
-openclaw_relay  (:8910, 绑主机 LAN IP 192.168.31.123)
+openclaw_relay  (:8910, 绑主机 LAN IP <NAS_LAN_IP>)
    │  openclaw agent --agent main -m "<task>" --json
    ▼  WebSocket
 OpenClaw Gateway  (:9090)  ──  真执行（exec 等工具）
@@ -63,7 +63,7 @@ OpenClaw Gateway  (:9090)  ──  真执行（exec 等工具）
 
 ### 4.1 主机 relay 服务
 文件 `/home/半夏/openclaw_relay.py` + systemd `/etc/systemd/system/openclaw-relay.service`（`Restart=always`）。
-- 监听 `192.168.31.123:8910`（**主机 LAN IP**，不是 127.0.0.1）。
+- 监听 `<NAS_LAN_IP>:8910`（**主机 LAN IP**，不是 127.0.0.1）。
 - `POST /run` 收 `{"task": "..."}` + Header `X-Relay-Token`，校验后调用：
   `openclaw agent --agent main --session-id relay-<pid> -m "<task>" --json`
 - 解析 stdout JSON，返回 `{"ok","text","calls","error"}`；单任务超时 280s。
@@ -75,7 +75,7 @@ OpenClaw Gateway  (:9090)  ──  真执行（exec 等工具）
 - `metadata.yaml`：`name / author / desc / version`（desc 必须与 `@register` 同步，见坑 6）。
 
 ### 4.3 网络
-astrbot 容器在自定义网络 `qq-whale_astrbot_network`，实测可直连 `192.168.31.123:8910`（relay）与 `:9090`（OpenClaw）——插件链路通畅。
+astrbot 容器在自定义网络 `qq-whale_astrbot_network`，实测可直连 `<NAS_LAN_IP>:8910`（relay）与 `:9090`（OpenClaw）——插件链路通畅。
 
 ## 五、踩坑全记录（重点）
 
@@ -98,7 +98,7 @@ astrbot 容器在自定义网络 `qq-whale_astrbot_network`，实测可直连 `1
 ### 坑 4：容器内连不到主机的 127.0.0.1
 - **现象**：插件 `POST 127.0.0.1:8910` 超时 / 连接拒绝。
 - **根因**：插件跑在 astrbot 容器内，容器的 `127.0.0.1` 是**容器自己**，不是主机；自定义 docker 网络下容器有独立 IP。
-- **解决**：relay 绑主机 LAN IP `192.168.31.123`，插件用同一 IP POST；`docker exec astrbot curl http://192.168.31.123:8910/health` 验证返回 200。
+- **解决**：relay 绑主机 LAN IP `<NAS_LAN_IP>`，插件用同一 IP POST；`docker exec astrbot curl http://<NAS_LAN_IP>:8910/health` 验证返回 200。
 
 ### 坑 5：relay 调 openclaw 报 command not found
 - **现象**：relay 的 `subprocess` 起 `openclaw` 报找不到命令 / node 找不到。
@@ -151,7 +151,7 @@ astrbot 容器在自定义网络 `qq-whale_astrbot_network`，实测可直连 `1
 
 ```bash
 systemctl status openclaw-relay --no-pager          # 看 relay 状态
-curl -s -X POST http://192.168.31.123:8910/run \
+curl -s -X POST http://<NAS_LAN_IP>:8910/run \
   -H 'X-Relay-Token: <你的REL-API-TOKEN>' -d '{"task":"echo hello"}'   # 手动测 relay（等价于 /任务）
 docker restart astrbot                               # 插件改完重启机器人
 ```
