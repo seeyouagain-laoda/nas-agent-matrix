@@ -1,0 +1,22 @@
+import paramiko, time
+host, user, pw = '<NAS_LAN_IP>', '<NAS_SSH_USER>', '<NAS_SSH_PASSWORD>'
+c = paramiko.SSHClient(); c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+c.connect(host, username=user, password=pw, port=22, timeout=20)
+base = "<NAS_DATA_DIR>/astrbot_data/plugins/openclaw_controller/"
+sftp = c.open_sftp()
+sftp.put(r"c:/Users/user/WorkBuddy/20260407224338/_new_main.py", base + "main.py")
+sftp.close()
+print("UPLOADED main.py")
+_, o, e = c.exec_command("grep -c 'stop_event' " + base + "main.py")
+print("disk stop_event count:", o.read().decode(errors='replace').strip())
+_, o, e = c.exec_command("docker restart astrbot")
+print("restart:", o.read().decode(errors='replace').strip(), "err:", e.read().decode(errors='replace').strip())
+time.sleep(20)
+_, o, e = c.exec_command("docker logs astrbot 2>&1 | grep -i 'openclaw_controller' | tail -2")
+print("LOAD LINE:", o.read().decode(errors='replace').strip())
+_, o, e = c.exec_command("docker logs astrbot 2>&1 | grep -i 'aiocqhttp' | tail -1")
+print("ADAPTER:", o.read().decode(errors='replace').strip())
+_, o, e = c.exec_command("docker logs astrbot 2>&1 | grep -iE 'Failed to import plugin openclaw_controller' | tail -2")
+print("IMPORT FAIL:", o.read().decode(errors='replace').strip() or "(none)")
+c.close()
+print("DONE")

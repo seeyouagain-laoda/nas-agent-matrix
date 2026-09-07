@@ -1,0 +1,32 @@
+# -*- coding: utf-8 -*-
+import paramiko
+HOST='<NAS_LAN_IP>'; USER='<NAS_SSH_USER>'; PW='<NAS_SSH_PASSWORD>'
+ssh=paramiko.SSHClient(); ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect(HOST,username=USER,password=PW,timeout=30)
+def run(c):
+    stdin,stdout,stderr=ssh.exec_command(c)
+    return stdout.read().decode('utf-8','replace').strip(), stderr.read().decode('utf-8','replace').strip()
+
+print('=== HOST: ls <NAS_DATA_DIR>/astrbot_data ===')
+o,e=run('ls -la <NAS_DATA_DIR>/astrbot_data/ 2>&1')
+print(o or '(empty)')
+print('=== HOST: readlink -f ===')
+o,e=run('readlink -f <NAS_DATA_DIR>/astrbot_data 2>&1')
+print(o)
+print('=== HOST: stat type ===')
+o,e=run('stat -f -c "%T" <NAS_DATA_DIR>/astrbot_data 2>&1; echo "---"; stat -c "%F %n" <NAS_DATA_DIR>/astrbot_data 2>&1')
+print(o)
+print('=== CONTAINER: /proc/mounts | AStrBot ===')
+o,e=run('echo %s | sudo -S docker exec astrbot sh -c "cat /proc/mounts | grep AStrBot"' % PW)
+print(o or '(none)')
+print('=== CONTAINER: ls /AStrBot/data ===')
+o,e=run('echo %s | sudo -S docker exec astrbot ls -la /AStrBot/data/ 2>&1' % PW)
+print(o or '(none)')
+print('=== CONTAINER: ls /AStrBot/data/plugins ===')
+o,e=run('echo %s | sudo -S docker exec astrbot ls -la /AStrBot/data/plugins/ 2>&1' % PW)
+print(o or '(none)')
+print('=== CONTAINER: astrbot config (plugin dir) ===')
+o,e=run('echo %s | sudo -S docker exec astrbot sh -c "grep -rni plugin_dir /AStrBot/data/config.yaml 2>/dev/null; echo ==; ls /AStrBot/data/*.yaml 2>/dev/null"' % PW)
+print(o or '(none)')
+ssh.close()
+print('DONE')

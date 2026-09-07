@@ -1,0 +1,4 @@
+name: openclaw_controller
+author: WorkBuddy
+desc: 鲸鱼娘(QQ)通过 /任务 执行 OpenClaw，/梗图 按标签发 whale-chan 本地表情包（935张），/生成 默认走 NAS 浏览器 Gemini 生图（附图即参考图）、失败自动兜底 PokeAPI，/生成参考 显式参考图生图；生图失败/内容拦截/Gemini对话式拒绝会立即告知；梗图 CDN 远程图用 Image.fromURL 直接发图（不再退化成链接）
+version: 1.4.9

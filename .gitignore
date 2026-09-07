@@ -1,0 +1,52 @@
+# ===== 密钥与凭据（绝不入库） =====
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+cookie.txt
+cookies.txt
+credentials.json
+*token*.json
+secrets.yaml
+secrets.yml
+
+# ===== 本地配置与运行时 =====
+config.local.*
+*.local
+*.log
+logs/
+tmp/
+temp/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ===== Node =====
+node_modules/
+dist/
+build/
+.npm/
+
+# ===== 数据库与缓存 =====
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# ===== 编辑器与系统 =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ===== 备份文件 =====
+*.bak
+*.orig
+*~
